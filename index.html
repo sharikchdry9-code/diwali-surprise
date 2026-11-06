@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Diwali Hysi Bounii ❤️</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & React-DOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone for JSX parsing -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @keyframes floatNote {
+      0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+      50% { transform: translateY(-12px) rotate(4deg); }
+      100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+    }
+    .animate-note-float {
+      animation: floatNote 3s ease-in-out infinite;
+    }
+    @keyframes scaleUp {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-scale-up {
+      animation: scaleUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-amber-50 font-sans antialiased selection:bg-amber-500 selection:text-black">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    function App() {
+      const [activeTab, setActiveTab] = useState('home');
+      const [soundEnabled, setSoundEnabled] = useState(true);
+      const [diyasLit, setDiyasLit] = useState([true, true, true, true, true]);
+      const [selectedWish, setSelectedWish] = useState(null);
+      const [isMailOpen, setIsMailOpen] = useState(false);
+
+      const audioCtxRef = useRef(null);
+
+      useEffect(() => {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtxRef.current = new AudioContext();
+        }
+        return () => {
+          if (audioCtxRef.current) audioCtxRef.current.close();
+        };
+      }, []);
+
+      const playSound = (type) => {
+        if (!soundEnabled || !audioCtxRef.current) return;
+        const ctx = audioCtxRef.current;
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+
+        if (type === 'whistle') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(350, now);
+          osc.frequency.exponentialRampToValueAtTime(1700, now + 0.7);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.7);
+        } else if (type === 'explosion') {
+          const bufferSize = ctx.sampleRate * 0.5;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const output = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(900, now);
+          filter.frequency.exponentialRampToValueAtTime(30, now + 0.5);
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.9, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          noise.start(now);
+          noise.stop(now + 0.5);
+        } else if (type === 'pop') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(90, now + 0.15);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'sizzle') {
+          const bufferSize = ctx.sampleRate * 1.2;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const output = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 3200;
+          filter.Q.value = 3;
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          noise.start(now);
+          noise.stop(now + 1.2);
+        }
+      };
+
+      const toggleDiya = (index) => {
+        const updated = [...diyasLit];
+        updated[index] = !updated[index];
+        setDiyasLit(updated);
+        playSound('pop');
+      };
+
+      const wishesList = [
+        { title: "1. Meri Pyaari Hysi Bounii", desc: "Aapki smile se mera har din Diwali jaisa roshan rehta hai! Happy Diwali Meri Kuchu Puchu!" },
+        { title: "2. Infinite Hugs Coupon", desc: "Redeemable anytime: Unlimited tight hugs whenever you feel low or cute!" },
+        { title: "3. Unlimited Flying Kisses", desc: "Iss Diwali, 100000+ flying kisses direct to your heart!" },
+        { title: "4. No-Fighting Pass", desc: "Valid for 1 Full Month: Main aapki har baat bina gusse ke sununga!" },
+        { title: "5. Favorite Snack Party", desc: "Coupon for your favorite ice cream, momos & chocolates on demand!" },
+        { title: "6. Late Night Calls", desc: "Jitni der chahe baatein karo, main sone ki zid nahi karunga!" },
+        { title: "7. Tu Hai Meri Phooljhadi", desc: "Sabse pyaari, sabse natkhat, aur meri favorite Diwali cracker!" },
+        { title: "8. 100% Pampering Promise", desc: "Jab bhi mood kharab hoga, full princess treatment milega!" },
+        { title: "9. Lifetime Bestie & Love", desc: "Har Diwali, har saal, sirf aapke saath hi manani hai!" },
+        { title: "10. Midnight Cravings Duty", desc: "Raat ko 2 baje bhi hunger pangs ho toh order or cooking ready!" },
+        { title: "11. Shopping Spree Partner", desc: "Aap jitni marzi shopping karo, main smile ke saath bags uthaunga!" },
+        { title: "12. Cutest Bounii Ever", desc: "Aap duniya ki sabse pyari aur sundar ladki ho, nazar na lage!" },
+        { title: "13. Queen of My Heart", desc: "Meri life ka sabse bada gift aap ho, Kuchu Puchu!" },
+        { title: "14. Special Movie Night", desc: "Aapki favorite romantic movies with popcorn & cozy blankets!" },
+        { title: "15. Always Listening Ears", desc: "Jitni bhi baatein karni ho, I'm all ears 24/7 for my Bounii!" },
+        { title: "16. Sweetest Surprise Vows", desc: "Har din aapko thoda aur pyaar karne ki zimmedari meri hai!" },
+        { title: "17. Extra Sweet Mithai", desc: "Duniya ki koi bhi kaju katli aapki mithaas ke aage fail hai!" },
+        { title: "18. Forever My Kuchu", desc: "Aapke bina meri Diwali aur meri life dono adhoori hain!" },
+        { title: "19. Magical Golden Future", desc: "Humare aane wale saal khushiyon se bhare ho aur hum humesha saath rahein!" },
+        { title: "20. The Ultimate Love Vow", desc: "I Love You Hysi Bounii! Aap meri jaan ho, meri duniya ho!" }
+      ];
+
+      return (
+        <div className="flex flex-col min-h-screen bg-slate-950 text-amber-50">
+          <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-amber-500/20 px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                ✨
+              </div>
+              <div>
+                <h1 className="text-base font-bold bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-500 bg-clip-text text-transparent">
+                  Hysi Bounii Diwali ✨
+                </h1>
+                <p className="text-[10px] text-amber-400/80 font-medium">For My Special Kuchu Puchu ❤️</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="p-2 rounded-full bg-slate-800 text-amber-400 hover:bg-slate-700 transition"
+            >
+              {soundEnabled ? "🔊" : "🔇"}
+            </button>
+          </header>
+
+          <main className="flex-1 pb-24">
+            {activeTab === 'home' && (
+              <HomeView diyasLit={diyasLit} toggleDiya={toggleDiya} setActiveTab={setActiveTab} />
+            )}
+            {activeTab === 'crackers' && (
+              <CrackersArenaView playSound={playSound} />
+            )}
+            {activeTab === 'wishes' && (
+              <WishesView wishesList={wishesList} setSelectedWish={setSelectedWish} />
+            )}
+            {activeTab === 'gift' && (
+              <GiftMailView isMailOpen={isMailOpen} setIsMailOpen={setIsMailOpen} playSound={playSound} />
+            )}
+          </main>
+
+          {selectedWish && (
+            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-gradient-to-b from-slate-900 to-amber-950 border-2 border-amber-500/50 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative animate-scale-up">
+                <button
+                  onClick={() => setSelectedWish(null)}
+                  className="absolute top-3 right-3 text-amber-400 font-bold bg-slate-800 rounded-full w-7 h-7"
+                >
+                  ✕
+                </button>
+                <div className="w-14 h-14 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/40 text-2xl">
+                  ❤️
+                </div>
+                <h3 className="text-xl font-bold text-amber-300 mb-2">{selectedWish.title}</h3>
+                <p className="text-sm text-slate-200 leading-relaxed mb-6">{selectedWish.desc}</p>
+                <button
+                  onClick={() => setSelectedWish(null)}
+                  className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold rounded-xl shadow-lg"
+                >
+                  Close Wish 💕
+                </button>
+              </div>
+            </div>
+          )}
+
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-amber-500/20 py-2 px-4">
+            <div className="max-w-md mx-auto flex justify-between items-center">
+              <NavButton icon="🪔" label="Home" active={activeTab === 'home'} onClick={() => setActiveTab('home')} />
+              <NavButton icon="🚀" label="Patake Arena" active={activeTab === 'crackers'} onClick={() => setActiveTab('crackers')} />
+              <NavButton icon="✨" label="20 Wishes" active={activeTab === 'wishes'} onClick={() => setActiveTab('wishes')} />
+              <NavButton icon="🎁" label="Gift Mail" active={activeTab === 'gift'} onClick={() => setActiveTab('gift')} />
+            </div>
+          </nav>
+        </div>
+      );
+    }
+
+    function NavButton({ icon, label, active, onClick }) {
+      return (
+        <button
+          onClick={onClick}
+          className={`flex flex-col items-center space-y-1 transition ${
+            active ? 'text-amber-400 scale-105 font-bold' : 'text-slate-400'
+          }`}
+        >
+          <div className={`p-1.5 rounded-xl text-lg ${active ? 'bg-amber-500/20 border border-amber-500/40' : ''}`}>
+            {icon}
+          </div>
+          <span className="text-[11px] font-medium">{label}</span>
+        </button>
+      );
+    }
+
+    function HomeView({ diyasLit, toggleDiya, setActiveTab }) {
+      return (
+        <div className="p-4 space-y-6 max-w-lg mx-auto">
+          <div className="relative rounded-3xl bg-gradient-to-br from-amber-950 via-slate-900 to-red-950 border border-amber-500/30 p-6 text-center shadow-2xl">
+            <span className="inline-block px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold mb-3">
+              Happy Diwali 🎉
+            </span>
+            <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-500 mb-2">
+              Hysi Bounii Ki Pyaari Diwali!
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed mb-6">
+              Duniya ki sabse khoobsurat Kuchu Puchu ke liye special interactive Diwali web app! Launch real sky rockets & claim cash gifts! 💖
+            </p>
+
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setActiveTab('crackers')}
+                className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-600 text-slate-950 font-bold text-xs shadow-lg"
+              >
+                <span>🚀 Blast Rockets</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('gift')}
+                className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-800 border border-amber-500/40 text-amber-300 font-bold text-xs shadow-lg"
+              >
+                <span>🎁 Open Shagun Mail</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/80 rounded-2xl border border-amber-500/20 p-5 text-center">
+            <h3 className="text-sm font-bold text-amber-300 mb-1">
+              🪔 Tap Diya To Light Up For Hysi Bounii
+            </h3>
+            <p className="text-[11px] text-slate-400 mb-4">Click any diya to light flame</p>
+
+            <div className="flex justify-around items-center pt-2">
+              {diyasLit.map((isLit, idx) => (
+                <div key={idx} onClick={() => toggleDiya(idx)} className="cursor-pointer flex flex-col items-center">
+                  <div className="h-8 flex items-end mb-1">
+                    {isLit ? (
+                      <div className="w-4 h-6 bg-gradient-to-t from-red-500 via-amber-400 to-yellow-200 rounded-full animate-bounce shadow-[0_0_15px_rgba(251,191,36,0.8)]" />
+                    ) : (
+                      <div className="w-1 h-3 bg-gray-600 rounded-full" />
+                    )}
+                  </div>
+                  <div className="w-10 h-5 bg-gradient-to-r from-amber-800 to-amber-900 rounded-b-full border-t border-amber-400 shadow-md relative">
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function CrackersArenaView({ playSound }) {
+      const canvasRef = useRef(null);
+      const particlesRef = useRef([]);
+      const rocketsRef = useRef([]);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+
+        const resize = () => {
+          canvas.width = canvas.parentElement.clientWidth;
+          canvas.height = canvas.parentElement.clientHeight;
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
+        const render = () => {
+          ctx.fillStyle = 'rgba(2, 6, 23, 0.25)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          for (let i = rocketsRef.current.length - 1; i >= 0; i--) {
+            const r = rocketsRef.current[i];
+            r.y += r.vy;
+            r.x += r.vx;
+
+            ctx.beginPath();
+            ctx.arc(r.x, r.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fill();
+
+            if (r.y <= r.targetY) {
+              createExplosion(r.x, r.y, r.color, r.type);
+              playSound(r.sound);
+              rocketsRef.current.splice(i, 1);
+            }
+          }
+
+          for (let i = particlesRef.current.length - 1; i >= 0; i--) {
+            const p = particlesRef.current[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity || 0.05;
+            p.alpha -= p.decay;
+
+            if (p.alpha <= 0) {
+              particlesRef.current.splice(i, 1);
+              continue;
+            }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.alpha;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+
+          animationFrameId = requestAnimationFrame(render);
+        };
+
+        render();
+
+        return () => {
+          window.removeEventListener('resize', resize);
+          cancelAnimationFrame(animationFrameId);
+        };
+      }, [playSound]);
+
+      const createExplosion = (x, y, color, type) => {
+        const count = type === 'bomb' ? 120 : type === 'skyShot' ? 90 : 50;
+        const colors = color === 'multi' 
+          ? ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#facc15']
+          : [color, '#ffffff', '#fbbf24'];
+
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * (type === 'bomb' ? 9 : 5) + 1;
+          particlesRef.current.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: Math.random() * 3 + 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: 1,
+            decay: Math.random() * 0.02 + 0.015,
+            gravity: 0.04
+          });
+        }
+      };
+
+      const launchRocket = (type = 'standard', customColor = '#fbbf24') => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const startX = Math.random() * (canvas.width - 100) + 50;
+        const targetY = Math.random() * (canvas.height * 0.4) + 60;
+        playSound('whistle');
+
+        rocketsRef.current.push({
+          x: startX,
+          y: canvas.height - 20,
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: - (Math.random() * 4 + 7),
+          targetY,
+          color: type === 'skyShot' ? 'multi' : customColor,
+          type,
+          sound: 'explosion'
+        });
+      };
+
+      const launchFountain = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        playSound('sizzle');
+        const startX = canvas.width / 2;
+        const startY = canvas.height - 10;
+
+        for (let i = 0; i < 90; i++) {
+          setTimeout(() => {
+            const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.6;
+            const speed = Math.random() * 7 + 4;
+            particlesRef.current.push({
+              x: startX + (Math.random() - 0.5) * 20,
+              y: startY,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              size: Math.random() * 3 + 1,
+              color: Math.random() > 0.5 ? '#facc15' : '#f59e0b',
+              alpha: 1,
+              decay: 0.03,
+              gravity: 0.15
+            });
+          }, i * 15);
+        }
+      };
+
+      const handleCanvasTap = (e) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        playSound('whistle');
+        rocketsRef.current.push({
+          x,
+          y: canvas.height - 10,
+          vx: 0,
+          vy: -8,
+          targetY: y,
+          color: 'multi',
+          type: 'skyShot',
+          sound: 'explosion'
+        });
+      };
+
+      return (
+        <div className="relative w-full h-[calc(100vh-130px)] bg-slate-950 flex flex-col">
+          <div className="absolute top-3 left-4 right-4 z-10 flex justify-between items-center pointer-events-none">
+            <div className="flex items-center space-x-2 bg-slate-900/80 px-3 py-1.5 rounded-full border border-amber-500/30">
+              <span>🌙</span>
+              <span className="text-xs font-semibold text-amber-200">Night Sky Arena</span>
+            </div>
+            <div className="text-[11px] text-amber-400 bg-slate-900/80 px-3 py-1 rounded-full border border-amber-500/20">
+              Tap Sky to Launch Rocket 🚀
+            </div>
+          </div>
+
+          <div className="absolute top-12 right-8 w-16 h-16 rounded-full bg-gradient-to-tr from-amber-100 to-amber-300 shadow-[0_0_30px_rgba(254,243,199,0.5)] opacity-80 pointer-events-none"></div>
+
+          <canvas ref={canvasRef} onClick={handleCanvasTap} className="flex-1 w-full h-full cursor-crosshair" />
+
+          <div className="p-3 bg-slate-900/95 border-t border-amber-500/30">
+            <div className="text-[11px] text-amber-300 font-semibold mb-2 text-center">
+              🔥 Firecracker Launch Controls (Tap to Blast)
+            </div>
+            <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
+              <button onClick={() => launchRocket('standard', '#f59e0b')} className="p-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-center">
+                <div className="text-base">🚀</div>
+                <span className="text-[10px] font-bold">Sky Rocket</span>
+              </button>
+              <button onClick={() => launchRocket('bomb', '#ef4444')} className="p-2 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 text-center">
+                <div className="text-base">💣</div>
+                <span className="text-[10px] font-bold">Atom Bomb</span>
+              </button>
+              <button onClick={() => launchRocket('skyShot', 'multi')} className="p-2 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-center">
+                <div className="text-base">✨</div>
+                <span className="text-[10px] font-bold">Sky Shot</span>
+              </button>
+              <button onClick={launchFountain} className="p-2 rounded-xl bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 text-center">
+                <div className="text-base">🎆</div>
+                <span className="text-[10px] font-bold">Anaar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function WishesView({ wishesList, setSelectedWish }) {
+      return (
+        <div className="p-4 space-y-4 max-w-lg mx-auto">
+          <div className="text-center">
+            <h2 className="text-xl font-extrabold text-amber-300">20 Cute Wishes & Vows 💌</h2>
+            <p className="text-xs text-slate-400">Specially for Hysi Bounii (Kuchu Puchu)</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+            {wishesList.map((wish, index) => (
+              <div
+                key={index}
+                onClick={() => setSelectedWish(wish)}
+                className="cursor-pointer bg-slate-900/80 hover:bg-slate-800 border border-amber-500/30 rounded-2xl p-4 flex items-start space-x-3"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center text-slate-950 font-black text-xs shrink-0">
+                  {index + 1}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold text-amber-200">{wish.title}</h3>
+                  <p className="text-xs text-slate-400 line-clamp-1 mt-0.5">{wish.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function GiftMailView({ isMailOpen, setIsMailOpen, playSound }) {
+      return (
+        <div className="p-4 max-w-lg mx-auto min-h-[70vh] flex flex-col items-center justify-center text-center">
+          {!isMailOpen ? (
+            <div className="space-y-6">
+              <div className="w-20 h-20 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto text-amber-400 text-3xl">
+                🎁
+              </div>
+              <div>
+                <span className="px-3 py-1 bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-semibold rounded-full">
+                  Confidential Gift Mail 💌
+                </span>
+                <h2 className="text-2xl font-bold text-amber-200 mt-2">Diwali Shagun For Hysi</h2>
+                <p className="text-xs text-slate-400 mt-1">Tap envelope to open cash & vouchers!</p>
+              </div>
+
+              <div
+                onClick={() => { setIsMailOpen(true); playSound('pop'); }}
+                className="cursor-pointer mx-auto w-64 h-44 bg-gradient-to-br from-amber-800 to-amber-950 rounded-2xl border-2 border-amber-500/50 shadow-2xl relative flex flex-col items-center justify-center hover:scale-105 transition"
+              >
+                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-red-600 to-red-800 border-2 border-amber-300 flex items-center justify-center text-amber-200 font-bold text-xs mb-2">
+                  SEAL
+                </div>
+                <span className="text-xs font-bold text-amber-300">TAP TO OPEN ✉️</span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-slate-900/95 border-2 border-amber-500/50 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl space-y-5 relative animate-scale-up">
+              <button onClick={() => setIsMailOpen(false)} className="absolute top-3 right-3 text-slate-400 text-xs bg-slate-800 px-2 py-1 rounded-full">
+                Close ✕
+              </button>
+
+              <div className="w-16 h-16 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-full flex items-center justify-center mx-auto text-slate-950 font-black text-2xl">
+                ₹
+              </div>
+
+              <div>
+                <span className="text-xs text-amber-400 font-semibold uppercase">Official Shagun Gift</span>
+                <h3 className="text-3xl font-extrabold text-amber-300 mt-1">₹5,001 INR</h3>
+                <p className="text-xs text-slate-300 mt-2">
+                  Happy Diwali Hysi Bounii! Iss Shagun cash se apni favorite dress & chocolates lelo! ❤️
+                </p>
+              </div>
+
+              {/* Realistic Animated ₹500 Notes Stack */}
+              <div className="relative h-28 w-full flex items-center justify-center my-2 overflow-hidden">
+                <div className="absolute w-44 h-20 bg-gradient-to-r from-emerald-700 via-teal-600 to-emerald-800 rounded-lg border border-amber-300/60 shadow-lg flex flex-col justify-between p-2 text-white transform -rotate-6 translate-x-2 animate-note-float">
+                  <div className="flex justify-between items-center text-[10px] font-bold">
+                    <span>RESERVE BANK OF INDIA</span>
+                    <span>₹500</span>
+                  </div>
+                  <div className="text-center font-extrabold text-xs tracking-widest text-emerald-100 opacity-80">
+                    SPECIMEN SHAGUN NOTE
+                  </div>
+                  <div className="flex justify-between text-[8px]">
+                    <span>FOR HYSI BOUNII</span>
+                    <span>PROMISE TO PAY</span>
+                  </div>
+                </div>
+
+                <div className="absolute w-44 h-20 bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-700 rounded-lg border border-amber-300 shadow-xl flex flex-col justify-between p-2 text-white transform rotate-3 -translate-y-1">
+                  <div className="flex justify-between items-center text-[10px] font-bold">
+                    <span>RESERVE BANK OF INDIA</span>
+                    <span>₹500</span>
+                  </div>
+                  <div className="text-center font-extrabold text-sm tracking-widest text-yellow-200">
+                    ₹5,001 SHAGUN
+                  </div>
+                  <div className="flex justify-between text-[8px]">
+                    <span>KUCHU PUCHU</span>
+                    <span>DIWALI SPECIAL</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-950/80 rounded-2xl p-4 border border-amber-500/20 text-left space-y-2">
+                <div className="text-[11px] text-amber-400 font-bold uppercase">Redemption Vouchers Included:</div>
+                <ul className="text-xs text-slate-300 space-y-1 list-disc list-inside">
+                  <li>1x Unlimited Shopping Spree Day</li>
+                  <li>1x Favorite Ice Cream & Momos Treat</li>
+                  <li>Infinite Love & Care Warranty</li>
+                </ul>
+              </div>
+
+              <button
+                onClick={() => setIsMailOpen(false)}
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-extrabold rounded-xl shadow-xl"
+              >
+                Claim Shagun Cash 💖
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
